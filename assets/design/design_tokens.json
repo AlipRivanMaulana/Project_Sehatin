@@ -1,0 +1,32 @@
+{
+  "brand": "Sehatin",
+  "canvas": {
+    "width": 390,
+    "height": 844
+  },
+  "colors": {
+    "primary": "#19A974",
+    "dark_green": "#087F5B",
+    "bg": "#F6FAF8",
+    "white": "#FFFFFF",
+    "text": "#17201D",
+    "muted": "#71827C",
+    "line": "#DCE9E4",
+    "soft": "#E5F5EE",
+    "danger": "#E05252",
+    "shadow": "#B7D8CD"
+  },
+  "font": "Inter",
+  "screens": [
+    "01_Splash_Screen",
+    "02_Login_Register",
+    "03_Home",
+    "04_Health_Check",
+    "05_Konsultasi",
+    "06_Profile",
+    "07_Detail_Dokter",
+    "08_Riwayat_Kesehatan",
+    "09_Notifikasi_Pengingat_Obat",
+    "10_Settings"
+  ]
+}

@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Sehatin — prototipe aplikasi kesehatan interaktif">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✚</text></svg>">
+<title>Sehatin — Interactive Prototype</title>
+<style>
+:root{--g:#19A974;--dg:#087F5B;--bg:#F6FAF8;--text:#17201D;--muted:#71827C;--line:#DCE9E4;--soft:#E5F5EE;--red:#E05252;--card:#ffffff;--shell:#dfe9e5}
+[data-theme="dark"]{--bg:#121712;--text:#EAF3EE;--muted:#8FA79C;--line:#233128;--soft:#17251d;--card:#182019;--shell:#0b0f0c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--shell);font-family:Inter,Arial,sans-serif;color:var(--text);transition:background .2s}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{width:min(390px,100vw);min-height:100vh;margin:auto;background:var(--bg);position:relative;overflow:hidden;transition:background .2s}
+.screen{display:none;min-height:100vh;padding:22px 24px 94px;animation:in .2s ease}
+.screen.active{display:block}
+@keyframes in{from{opacity:.3;transform:translateX(8px)}to{opacity:1;transform:none}}
+.status{height:24px;font-size:11px;font-weight:700;display:flex;justify-content:space-between;color:var(--text)}
+h1{font-size:22px;margin:16px 0 5px}
+h2{font-size:16px;margin:0 0 14px}
+p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.header{display:flex;align-items:center;gap:10px;margin:14px 0 18px}
+.back{border:0;background:none;font-size:28px;line-height:1;cursor:pointer;color:var(--text)}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 5px 18px #0001;margin:10px 0}
+.hero{background:linear-gradient(135deg,var(--g),var(--dg));color:#fff;border-radius:14px;padding:16px;margin:14px 0}
+.hero p{color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.btn{border:0;background:var(--g);color:#fff;width:100%;height:44px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.outline{background:transparent;color:var(--dg);border:1px solid var(--g)}
+.btn.ghost{background:none;color:var(--muted);border:1px solid var(--line);height:38px;font-size:12px}
+.field{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:0 14px;margin:7px 0;outline:none}
+.field:focus{border-color:var(--g);box-shadow:0 0 0 3px #19a97422}
+textarea.field{height:auto;padding:10px 14px;resize:vertical}
+.err{color:var(--red);font-size:10px;min-height:13px;margin:-3px 0 4px 2px;display:block}
+.chips{display:flex;gap:7px;overflow:auto;padding-bottom:4px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:7px 11px;font-size:10px;white-space:nowrap;cursor:pointer}
+.chip.active{background:var(--g);color:#fff;border-color:var(--g)}
+.icon{width:40px;height:40px;border-radius:12px;background:var(--soft);display:grid;place-items:center;color:var(--dg);font-size:19px;flex-shrink:0}
+.row{display:flex;align-items:center;gap:12px}
+.grow{flex:1;min-width:0}
+.small{font-size:9px;color:var(--muted)}
+.green{color:var(--dg)}
+.danger{color:var(--red)}
+.bottom{position:fixed;bottom:0;width:min(390px,100vw);height:76px;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:10}
+.nav{border:0;background:none;color:var(--muted);font-size:9px;cursor:pointer}
+.nav b{display:block;font-size:19px;margin-bottom:3px}
+.nav.active{color:var(--g)}
+.splash{min-height:100vh;display:grid;place-items:center;text-align:center;background:linear-gradient(var(--soft),var(--bg))}
+.logo{width:78px;height:78px;border-radius:50%;background:var(--card);display:grid;place-items:center;margin:auto;color:var(--g);font-size:34px;box-shadow:0 8px 30px #087f5b22}
+.splash h1{font-size:36px}
+.center{text-align:center}
+.result{display:none}
+.result.show{display:block}
+.switch{appearance:none;width:42px;height:23px;background:#cbd9d4;border-radius:20px;position:relative;cursor:pointer;flex-shrink:0}
+.switch:checked{background:var(--g)}
+.switch:after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+.switch:checked:after{left:22px}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(15px);background:#17201deF;color:#fff;padding:10px 14px;border-radius:10px;font-size:10px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:80%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}
+.empty div{font-size:34px;margin-bottom:8px}
+.modal-overlay{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--card);width:min(390px,100vw);border-radius:18px 18px 0 0;padding:20px 22px 26px;animation:up .2s ease}
+@keyframes up{from{transform:translateY(20px);opacity:.4}to{transform:none;opacity:1}}
+.modal-box h2{margin-bottom:12px}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);overflow:auto;padding:6px 0;gap:8px}
+.bubble{max-width:78%;padding:9px 12px;border-radius:14px;font-size:11px;line-height:1.5}
+.bubble.me{align-self:flex-end;background:var(--g);color:#fff;border-bottom-right-radius:4px}
+.bubble.doc{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+.chat-input{position:fixed;bottom:0;width:min(390px,100vw);background:var(--card);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:8px;z-index:15}
+.chat-input .field{margin:0}
+.rating{color:#e0a52e;font-size:11px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<section class="screen active" id="splash">
+  <div class="splash"><div><div class="logo">✚</div><h1>Sehatin</h1><p>Jaga sehatmu, mulai dari sekarang.</p><button class="btn" style="margin-top:28px;width:230px" onclick="go('login')">Mulai</button></div></div>
+</section>
+
+<section class="screen" id="login">
+  <div class="status"><span>9:41</span><span>▮▮ ᯤ ▰</span></div>
+  <div class="center" style="margin:30px 0 22px"><div class="logo" style="width:64px;height:64px;font-size:27px">✚</div><h1>Sehatin</h1><p>Masuk untuk melanjutkan</p></div>
+  <input class="field" id="lEmail" placeholder="✉  Email atau nomor HP">
+  <span class="err" id="lEmailErr"></span>
+  <input class="field" id="lPassword" type="password" placeholder="🔒  Password">
+  <span class="err" id="lPassErr"></span>
+  <div class="row small" style="justify-content:space-between;margin:2px 2px 16px"><span>☐ Ingat saya</span><button class="nav green" style="font-size:9px" onclick="toast('Fitur reset password siap dihubungkan ke backend')">Lupa password?</button></div>
+  <button class="btn" onclick="login()">Masuk</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="fillDemo()">Gunakan Akun Demo</button>
+  <p class="center" style="margin-top:20px">Belum punya akun? <button class="nav green" onclick="go('register')">Daftar di sini</button></p>
+</section>
+
+<section class="screen" id="register">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Buat Akun</h2></div>
+  <p>Daftar untuk mulai memantau kesehatanmu.</p>
+  <input class="field" id="rName" placeholder="👤  Nama lengkap">
+  <span class="err" id="rNameErr"></span>
+  <input class="field" id="rEmail" placeholder="✉  Email">
+  <span class="err" id="rEmailErr"></span>
+  <input class="field" id="rAge" type="number" placeholder="🎂  Umur (tahun)">
+  <span class="err" id="rAgeErr"></span>
+  <input class="field" id="rPassword" type="password" placeholder="🔒  Password (min. 6 karakter)">
+  <span class="err" id="rPassErr"></span>
+  <input class="field" id="rPassword2" type="password" placeholder="🔒  Ulangi password">
+  <span class="err" id="rPass2Err"></span>
+  <button class="btn" onclick="registerUser()">Daftar</button>
+</section>
+
+<section class="screen" id="home">
+  <div class="status"><span>9:41</span><span>▮▮ ᯤ ▰</span></div>
+  <h1 id="homeGreeting">Halo 👋</h1><p>Semangat jaga kesehatanmu hari ini!</p>
+  <div class="hero"><b>Status Kesehatanmu</b><p id="heroStatus">Belum ada data cek kesehatan</p></div>
+  <div class="statgrid">
+    <div class="card"><div class="green">❤</div><div class="small">Heart Rate</div><b>72 bpm</b></div>
+    <div class="card"><div class="green">🌙</div><div class="small">Tidur</div><b>7j 30m</b></div>
+    <div class="card"><div class="green">👣</div><div class="small">Langkah</div><b>6.482</b></div>
+  </div>
+  <h2 style="margin-top:18px">Aksi Cepat</h2>
+  <div class="grid">
+    <button class="card" onclick="go('health')" style="border:0;text-align:left;cursor:pointer"><div class="icon">🩺</div><b>Cek Kesehatan</b><p>Cek kondisi tubuhmu</p></button>
+    <button class="card" onclick="go('reminder')" style="border:0;text-align:left;cursor:pointer"><div class="icon">💊</div><b>Obat</b><p>Jadwal & pengingat</p></button>
+    <button class="card" onclick="go('consult')" style="border:0;text-align:left;cursor:pointer"><div class="icon">💬</div><b>Konsultasi</b><p>Chat dengan dokter</p></button>
+    <button class="card" onclick="go('history')" style="border:0;text-align:left;cursor:pointer"><div class="icon">📋</div><b>Catatan</b><p>Riwayat kesehatan</p></button>
+  </div>
+</section>
+
+<section class="screen" id="health">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Cek Kesehatan</h2></div>
+  <p>Isi data untuk mendapatkan penilaian kesehatan.</p>
+  <input class="field" id="age" type="number" placeholder="Umur (tahun)">
+  <input class="field" id="height" type="number" placeholder="Tinggi badan (cm)">
+  <input class="field" id="weight" type="number" placeholder="Berat badan (kg)">
+  <select class="field" id="activity"><option value="1.2">Aktivitas rendah</option><option value="1.45">Aktivitas sedang</option><option value="1.65">Aktivitas tinggi</option></select>
+  <button class="btn" onclick="healthCheck()">Lihat Hasil</button>
+  <div class="card result" id="healthResult">
+    <h2>Hasil Penilaian</h2><div class="center"><div style="font-size:32px;font-weight:800;color:var(--g)" id="score">--</div><div class="small">skor kesehatan</div></div>
+    <p id="bmiText" style="margin-top:12px"></p><p id="healthAdvice" style="margin-top:6px"></p>
+    <p class="green small" style="margin-top:10px">✓ Hasil otomatis tersimpan ke Riwayat Kesehatan</p>
+  </div>
+</section>
+
+<section class="screen" id="consult">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Konsultasi Dokter</h2></div>
+  <input class="field" id="searchDoctor" placeholder="🔍  Cari dokter atau spesialis..." oninput="renderDoctors()">
+  <div class="chips"><button class="chip active" onclick="filterChip(this,'')">Semua</button><button class="chip" onclick="filterChip(this,'Umum')">Umum</button><button class="chip" onclick="filterChip(this,'Kulit')">Kulit</button><button class="chip" onclick="filterChip(this,'Gizi')">Gizi</button><button class="chip" onclick="filterChip(this,'Kandungan')">Kandungan</button></div>
+  <div id="doctorList"></div>
+</section>
+
+<section class="screen" id="doctor">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Detail Dokter</h2></div>
+  <div class="card"><div class="row"><div class="logo" style="width:58px;height:58px;font-size:23px" id="docAva">A</div><div><b id="docName">dr. Andi Pratama, Sp.PD</b><p id="docSpec">Penyakit Dalam</p><p class="rating" id="docRating">★ 4.8 • ● Online</p></div></div></div>
+  <h2>Jadwal Praktik</h2><div class="chips" id="slots"></div>
+  <h2 style="margin-top:18px">Ulasan Pasien</h2><div id="docReviews"></div>
+  <button class="btn" style="margin-top:18px" onclick="startChat()">💬 Konsultasi Sekarang</button>
+</section>
+
+<section class="screen" id="chat">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2 id="chatDocName">Chat Dokter</h2></div>
+  <div class="chat-wrap" id="chatWrap"></div>
+  <div class="chat-input">
+    <input class="field" id="chatInput" placeholder="Tulis pesan..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="btn" style="width:60px" onclick="sendChat()">➤</button>
+  </div>
+</section>
+
+<section class="screen" id="history">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Riwayat Kesehatan</h2></div>
+  <button class="btn outline" onclick="openNoteModal()">＋ Tambah Catatan</button>
+  <div id="historyList" style="margin-top:10px"></div>
+</section>
+
+<section class="screen" id="reminder">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Pengingat Obat</h2></div>
+  <button class="btn outline" onclick="openReminderModal()">＋ Tambah Pengingat</button>
+  <h2 style="margin-top:22px">Jadwal Hari Ini</h2><div id="meds"></div>
+</section>
+
+<section class="screen" id="profile">
+  <div class="hero center"><div class="logo" id="profAva" style="width:70px;height:70px">A</div><h2 style="margin-top:10px" id="profName">Nama Pengguna</h2><p id="profSub">Mahasiswa</p><button class="btn ghost" style="margin-top:12px;background:#ffffff22;color:#fff;border-color:#ffffff55" onclick="openEditProfile()">✎ Edit Profil</button></div>
+  <div id="profileItems"></div>
+  <button class="btn outline danger" style="margin-top:12px" onclick="logout()">⇥ Keluar</button>
+</section>
+
+<section class="screen" id="settings">
+  <div class="header"><button class="back" onclick="back()">‹</button><h2>Pengaturan</h2></div>
+  <div class="card row"><div class="grow"><b>Notifikasi</b><p>Pengingat kesehatan</p></div><input class="switch" type="checkbox" id="notifSwitch" onchange="saveSetting('notif',this.checked)"></div>
+  <div class="card row"><div class="grow"><b>Mode Gelap</b><p>Tampilan aplikasi</p></div><input class="switch" type="checkbox" id="darkSwitch" onchange="toggleDark(this.checked)"></div>
+  <div class="card" onclick="testNotif()" style="cursor:pointer"><b>🔔 Tes Notifikasi</b><p>Kirim notifikasi percobaan</p></div>
+  <div class="card" onclick="toast('Bahasa: Indonesia')" style="cursor:pointer"><b>Bahasa</b><p>Bahasa Indonesia</p></div>
+  <div class="card" onclick="toast('Sehatin v1.1 — prototype interaktif')" style="cursor:pointer"><b>Tentang Sehatin</b><p>Informasi aplikasi</p></div>
+  <div class="card danger" onclick="resetDemo()" style="cursor:pointer"><b>♻ Reset Data Demo</b><p>Hapus semua data tersimpan di perangkat ini</p></div>
+</section>
+
+<nav class="bottom" id="bottom">
+<button class="nav" data-go="home"><b>🏠</b>Beranda</button>
+<button class="nav" data-go="health"><b>🩺</b>Kesehatan</button>
+<button class="nav" data-go="consult"><b>💬</b>Konsultasi</button>
+<button class="nav" data-go="profile"><b>👤</b>Profil</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+</div>
+<script>
+/* ---------- storage helpers ---------- */
+const LS = {user:'sehatin_user',logged:'sehatin_logged',history:'sehatin_history',reminders:'sehatin_reminders',dark:'sehatin_dark',notif:'sehatin_notif',chats:'sehatin_chats'};
+function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch(e){return fallback}}
+function save(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
+
+function seedIfEmpty(){
+  if(!load(LS.user,null)){
+    save(LS.user,{name:'Alip Rivan Maulana',email:'alip@sehatin.id',password:'sehatin123',age:19,bio:'Mahasiswa'});
+  }
+  if(!load(LS.history,null)){
+    save(LS.history,[
+      {icon:'💬',title:'Konsultasi Dokter',detail:'dr. Siti Nurhaliza',date:'08 Sep 2025'},
+      {icon:'💊',title:'Obat',detail:'Paracetamol dikonsumsi',date:'05 Sep 2025'},
+      {icon:'📋',title:'Catatan Kesehatan',detail:'Sakit kepala ringan',date:'01 Sep 2025'}
+    ]);
+  }
+  if(!load(LS.reminders,null)){
+    save(LS.reminders,[
+      {id:1,name:'Paracetamol 500mg',time:'08:00',note:'Setelah makan',active:true},
+      {id:2,name:'Vitamin D',time:'12:00',note:'Setelah makan',active:true},
+      {id:3,name:'Multivitamin',time:'18:00',note:'Setelah makan',active:true}
+    ]);
+  }
+}
+seedIfEmpty();
+
+/* ---------- navigation ---------- */
+const screens=['splash','login','register','home','health','consult','doctor','chat','history','reminder','profile','settings'];
+let current='splash', historyStack=[];
+function go(id){
+  if(current!==id) historyStack.push(current);
+  current=id;
+  screens.forEach(x=>document.getElementById(x).classList.toggle('active',x===id));
+  document.getElementById('bottom').style.display=['splash','login','register','doctor','settings','chat'].includes(id)?'none':'grid';
+  document.querySelectorAll('.nav[data-go]').forEach(n=>n.classList.toggle('active',n.dataset.go===id));
+  if(id==='consult')renderDoctors();
+  if(id==='history')renderHistory();
+  if(id==='reminder')renderMeds();
+  if(id==='home')renderHome();
+  if(id==='profile')renderProfile();
+  window.scrollTo(0,0);
+}
+function back(){go(historyStack.pop()||'home')}
+
+/* ---------- toast ---------- */
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>e.classList.remove('show'),2000)}
+
+/* ---------- modal helper ---------- */
+function openModal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalOverlay').classList.add('show')}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal()});
+
+/* ---------- validation helpers ---------- */
+function setErr(id,msg){document.getElementById(id).textContent=msg||''}
+function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$|^[0-9+]{8,15}$/.test(v)}
+
+/* ---------- auth ---------- */
+function fillDemo(){document.getElementById('lEmail').value='alip@sehatin.id';document.getElementById('lPassword').value='sehatin123';toast('Akun demo diisi otomatis')}
+function login(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPassword').value;
+  setErr('lEmailErr','');setErr('lPassErr','');
+  if(!email){setErr('lEmailErr','Email/No. HP wajib diisi');return}
+  if(!pass){setErr('lPassErr','Password wajib diisi');return}
+  const user=load(LS.user,null);
+  if(!user||user.email.toLowerCase()!==email.toLowerCase()||user.password!==pass){
+    setErr('lPassErr','Email atau password salah');toast('Login gagal — coba akun demo');return;
+  }
+  save(LS.logged,true);
+  toast('Selamat datang, '+user.name.split(' ')[0]+'!');
+  historyStack=[];go('home');
+}
+function registerUser(){
+  const name=document.getElementById('rName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const age=document.getElementById('rAge').value;
+  const pass=document.getElementById('rPassword').value;
+  const pass2=document.getElementById('rPassword2').value;
+  ['rNameErr','rEmailErr','rAgeErr','rPassErr','rPass2Err'].forEach(id=>setErr(id,''));
+  let ok=true;
+  if(name.length<3){setErr('rNameErr','Nama minimal 3 karakter');ok=false}
+  if(!validEmail(email)){setErr('rEmailErr','Format email/No. HP tidak valid');ok=false}
+  if(!age||age<10||age>100){setErr('rAgeErr','Umur tidak valid');ok=false}
+  if(pass.length<6){setErr('rPassErr','Password minimal 6 karakter');ok=false}
+  if(pass!==pass2){setErr('rPass2Err','Password tidak sama');ok=false}
+  if(!ok)return;
+  save(LS.user,{name,email,password:pass,age:+age,bio:'Pengguna Sehatin'});
+  save(LS.logged,true);
+  toast('Akun berhasil dibuat! Selamat datang, '+name.split(' ')[0]);
+  historyStack=[];go('home');
+}
+function logout(){
+  openModal(`<h2>Keluar dari akun?</h2><p style="margin-bottom:16px">Kamu perlu login lagi untuk mengakses Sehatin.</p>
+  <button class="btn danger" style="background:var(--red)" onclick="confirmLogout()">Ya, Keluar</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">Batal</button>`);
+}
+function confirmLogout(){save(LS.logged,false);closeModal();toast('Berhasil keluar');historyStack=[];go('login')}
+
+/* ---------- home ---------- */
+function renderHome(){
+  const user=load(LS.user,{});
+  document.getElementById('homeGreeting').textContent='Halo, '+(user.name?user.name.split(' ')[0]:'Sobat Sehat')+' 👋';
+  const hist=load(LS.history,[]);
+  const lastCheck=hist.find(h=>h.icon==='🩺');
+  document.getElementById('heroStatus').textContent=lastCheck?('Skor terakhir: '+lastCheck.detail+' • '+lastCheck.date):'Belum ada data cek kesehatan — yuk cek sekarang';
+}
+
+/* ---------- health check ---------- */
+function healthCheck(){
+  let a=+age.value,h=+height.value,w=+weight.value;
+  if(!a||!h||!w||h<80||w<20){toast('Isi umur, tinggi, dan berat dengan benar');return}
+  let bmi=w/((h/100)**2), score=Math.max(40,Math.min(98,Math.round(92-Math.abs(bmi-21.5)*7)));
+  const cat=bmi<18.5?'Berat badan kurang':bmi<25?'Normal':bmi<30?'Kelebihan berat badan':'Obesitas';
+  document.getElementById('score').textContent=score;
+  document.getElementById('bmiText').textContent='BMI: '+bmi.toFixed(1)+' — '+cat;
+  document.getElementById('healthAdvice').textContent=score>=75?'Kondisi terlihat cukup baik. Tetap jaga tidur, makan, dan aktivitas fisik.':'Perhatikan pola makan, tidur, dan aktivitas; pertimbangkan konsultasi jika ada keluhan.';
+  document.getElementById('healthResult').classList.add('show');
+  const hist=load(LS.history,[]);
+  hist.unshift({icon:'🩺',title:'Cek Kesehatan',detail:score+'/100 • BMI '+bmi.toFixed(1),date:todayStr()});
+  save(LS.history,hist);
+}
+function todayStr(){const d=new Date();return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}
+
+/* ---------- doctors ---------- */
+const doctors=[
+ {name:'dr. Andi Pratama, Sp.PD',spec:'Umum / Penyakit Dalam',ava:'A',rating:4.8,online:true,reviews:['Penjelasannya sangat jelas dan sabar.','Responsif dan ramah saat konsultasi online.']},
+ {name:'dr. Siti Nurhaliza, Sp.KK',spec:'Kulit & Kelamin',ava:'S',rating:4.9,online:true,reviews:['Sangat membantu untuk masalah kulit saya.','Rekomendasi obatnya cocok, sembuh dalam seminggu.']},
+ {name:'dr. Budi Santoso, Sp.OG',spec:'Umum / Kandungan',ava:'B',rating:4.7,online:false,reviews:['Konsultasi nyaman, tidak terburu-buru.']},
+ {name:'dr. Rina Anggraini, Sp.GK',spec:'Gizi',ava:'R',rating:4.8,online:true,reviews:['Diberi rencana makan yang realistis dan mudah diikuti.']}
+];
+let activeDoctorIndex=null;
+let currentChip='';
+function renderDoctors(){
+  const q=(document.getElementById('searchDoctor').value||'').toLowerCase();
+  const filtered=doctors.map((d,i)=>({...d,i})).filter(d=>(d.name+' '+d.spec).toLowerCase().includes(q)&&(d.spec.includes(currentChip)||currentChip===''));
+  const list=document.getElementById('doctorList');
+  if(!filtered.length){list.innerHTML='<div class="empty"><div>🔎</div><p>Tidak ada dokter yang cocok.<br>Coba kata kunci lain.</p></div>';return}
+  list.innerHTML=filtered.map(d=>`<div class="card row"><div class="logo" style="width:46px;height:46px;font-size:16px">${d.ava}</div><div class="grow"><b>${d.name}</b><p>${d.spec}</p><p class="rating">★ ${d.rating} • ${d.online?'🟢 Online':'⚪ Offline'}</p></div><button class="btn" style="width:70px;height:34px;font-size:9px" onclick="openDoctor(${d.i})">Lihat</button></div>`).join('');
+}
+function filterChip(el,s){document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');currentChip=s;renderDoctors()}
+function openDoctor(i){
+  activeDoctorIndex=i;
+  const d=doctors[i];
+  document.getElementById('docAva').textContent=d.ava;
+  document.getElementById('docName').textContent=d.name;
+  document.getElementById('docSpec').textContent=d.spec;
+  document.getElementById('docRating').innerHTML='★ '+d.rating+' • '+(d.online?'🟢 Online':'⚪ Offline');
+  document.getElementById('slots').innerHTML=['08:00','10:00','13:00','15:00'].map(x=>`<button class="chip" onclick="pickSlot(this,'${x}')">${x}</button>`).join('');
+  document.getElementById('docReviews').innerHTML=d.reviews.map(r=>`<div class="card"><p class="rating">★★★★★</p><p style="margin-top:4px;color:var(--text)">${r}</p></div>`).join('');
+  go('doctor');
+}
+function pickSlot(el,time){document.querySelectorAll('#slots .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');toast('Slot '+time+' dipilih')}
+
+/* ---------- chat ---------- */
+const autoReplies=['Baik, bisa dijelaskan sejak kapan keluhannya muncul?','Terima kasih infonya, saya catat dulu ya.','Untuk sementara, coba istirahat cukup dan minum air putih yang banyak.','Apakah ada keluhan lain yang menyertai?','Ini prototipe demo — di versi produksi jawaban akan datang dari dokter sungguhan.'];
+function startChat(){
+  const d=doctors[activeDoctorIndex];
+  document.getElementById('chatDocName').textContent=d.name;
+  renderChat();
+  go('chat');
+}
+function getChats(){return load(LS.chats,{})}
+function renderChat(){
+  const chats=getChats();
+  const msgs=chats[activeDoctorIndex]||[{from:'doc',text:'Halo! Ada yang bisa saya bantu terkait kondisi kesehatanmu?'}];
+  const wrap=document.getElementById('chatWrap');
+  wrap.innerHTML=msgs.map(m=>`<div class="bubble ${m.from==='me'?'me':'doc'}">${m.text}</div>`).join('');
+  wrap.scrollTop=wrap.scrollHeight;
+}
+function sendChat(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const chats=getChats();
+  if(!chats[activeDoctorIndex])chats[activeDoctorIndex]=[{from:'doc',text:'Halo! Ada yang bisa saya bantu terkait kondisi kesehatanmu?'}];
+  chats[activeDoctorIndex].push({from:'me',text});
+  save(LS.chats,chats);
+  input.value='';
+  renderChat();
+  setTimeout(()=>{
+    const c2=getChats();
+    c2[activeDoctorIndex].push({from:'doc',text:autoReplies[Math.floor(Math.random()*autoReplies.length)]});
+    save(LS.chats,c2);
+    renderChat();
+  },900);
+}
+
+/* ---------- history ---------- */
+function renderHistory(){
+  const hist=load(LS.history,[]);
+  const list=document.getElementById('historyList');
+  if(!hist.length){list.innerHTML='<div class="empty"><div>📋</div><p>Belum ada riwayat kesehatan.</p></div>';return}
+  list.innerHTML=hist.map((x,i)=>`<div class="card row"><div class="icon">${x.icon}</div><div class="grow"><b>${x.title}</b><p>${x.date} • ${x.detail}</p></div><button class="back" style="font-size:16px" onclick="deleteHistory(${i})" title="Hapus">🗑</button></div>`).join('');
+}
+function deleteHistory(i){const hist=load(LS.history,[]);hist.splice(i,1);save(LS.history,hist);renderHistory();toast('Catatan dihapus')}
+function openNoteModal(){
+  openModal(`<h2>Tambah Catatan Kesehatan</h2>
+  <input class="field" id="noteTitle" placeholder="Judul (mis. Sakit kepala)">
+  <input class="field" id="noteDetail" placeholder="Detail singkat">
+  <button class="btn" onclick="addNote()">Simpan</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">Batal</button>`);
+}
+function addNote(){
+  const title=document.getElementById('noteTitle').value.trim();
+  const detail=document.getElementById('noteDetail').value.trim();
+  if(!title){toast('Judul catatan wajib diisi');return}
+  const hist=load(LS.history,[]);
+  hist.unshift({icon:'📋',title,detail:detail||'-',date:todayStr()});
+  save(LS.history,hist);
+  closeModal();renderHistory();toast('Catatan ditambahkan');
+}
+
+/* ---------- reminders ---------- */
+function renderMeds(){
+  const meds=load(LS.reminders,[]);
+  const list=document.getElementById('meds');
+  if(!meds.length){list.innerHTML='<div class="empty"><div>💊</div><p>Belum ada pengingat obat.</p></div>';return}
+  list.innerHTML=meds.map(m=>`<div class="card row"><div class="icon">💊</div><div class="grow"><b>${m.name}</b><p>${m.time} • ${m.note}</p></div><input class="switch" type="checkbox" ${m.active?'checked':''} onchange="toggleReminder(${m.id},this.checked)"><button class="back" style="font-size:16px" onclick="deleteReminder(${m.id})" title="Hapus">🗑</button></div>`).join('');
+}
+function toggleReminder(id,val){const meds=load(LS.reminders,[]);const m=meds.find(x=>x.id===id);if(m)m.active=val;save(LS.reminders,meds);toast(val?'Pengingat aktif':'Pengingat dimatikan')}
+function deleteReminder(id){const meds=load(LS.reminders,[]).filter(x=>x.id!==id);save(LS.reminders,meds);renderMeds();toast('Pengingat dihapus')}
+function openReminderModal(){
+  openModal(`<h2>Tambah Pengingat</h2>
+  <input class="field" id="remName" placeholder="Nama obat">
+  <input class="field" id="remTime" type="time" value="08:00">
+  <input class="field" id="remNote" placeholder="Catatan (mis. Setelah makan)">
+  <button class="btn" onclick="addReminder()">Simpan</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">Batal</button>`);
+}
+function addReminder(){
+  const name=document.getElementById('remName').value.trim();
+  const time=document.getElementById('remTime').value||'08:00';
+  const note=document.getElementById('remNote').value.trim()||'Sesuai anjuran';
+  if(!name){toast('Nama obat wajib diisi');return}
+  const meds=load(LS.reminders,[]);
+  meds.push({id:Date.now(),name,time,note,active:true});
+  meds.sort((a,b)=>a.time.localeCompare(b.time));
+  save(LS.reminders,meds);
+  closeModal();renderMeds();toast('Pengingat ditambahkan');
+}
+
+/* ---------- profile ---------- */
+function renderProfile(){
+  const user=load(LS.user,{});
+  document.getElementById('profAva').textContent=(user.name||'?').charAt(0).toUpperCase();
+  document.getElementById('profName').textContent=user.name||'-';
+  document.getElementById('profSub').textContent=(user.bio||'Pengguna')+' • '+(user.age||'-')+' tahun';
+  document.getElementById('profileItems').innerHTML=[
+    ['👤','Data Pribadi','home'],['📋','Riwayat Kesehatan','history'],['💊','Pengingat Obat','reminder'],['💬','Konsultasi Saya','consult'],['⚙','Pengaturan','settings']
+  ].map(x=>`<button class="card row" style="width:100%;border:0;text-align:left;cursor:pointer" onclick="go('${x[2]}')"><div class="icon">${x[0]}</div><div class="grow"><b>${x[1]}</b><p>Lihat dan kelola</p></div><span>›</span></button>`).join('');
+}
+function openEditProfile(){
+  const user=load(LS.user,{});
+  openModal(`<h2>Edit Profil</h2>
+  <input class="field" id="epName" placeholder="Nama" value="${user.name||''}">
+  <input class="field" id="epAge" type="number" placeholder="Umur" value="${user.age||''}">
+  <input class="field" id="epBio" placeholder="Status (mis. Mahasiswa)" value="${user.bio||''}">
+  <button class="btn" onclick="saveProfile()">Simpan</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">Batal</button>`);
+}
+function saveProfile(){
+  const user=load(LS.user,{});
+  const name=document.getElementById('epName').value.trim();
+  if(!name){toast('Nama tidak boleh kosong');return}
+  user.name=name;
+  user.age=+document.getElementById('epAge').value||user.age;
+  user.bio=document.getElementById('epBio').value.trim()||user.bio;
+  save(LS.user,user);
+  closeModal();renderProfile();toast('Profil diperbarui');
+}
+
+/* ---------- settings ---------- */
+function toggleDark(on){
+  document.documentElement.setAttribute('data-theme',on?'dark':'light');
+  save(LS.dark,on);
+  toast(on?'Mode gelap aktif':'Mode terang aktif');
+}
+function saveSetting(key,val){save(LS[key]||key,val)}
+function testNotif(){
+  if(!('Notification' in window)){toast('Browser tidak mendukung notifikasi — simulasi: 💊 Waktunya minum obat!');return}
+  if(Notification.permission==='granted'){new Notification('Sehatin',{body:'💊 Waktunya minum obat!'});}
+  else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted')new Notification('Sehatin',{body:'💊 Waktunya minum obat!'});
+      else toast('Izin notifikasi ditolak — simulasi: 💊 Waktunya minum obat!');
+    });
+  } else toast('Izin notifikasi diblokir di browser — simulasi: 💊 Waktunya minum obat!');
+}
+function resetDemo(){
+  openModal(`<h2>Reset Data Demo?</h2><p style="margin-bottom:16px">Semua akun, riwayat, dan pengingat yang tersimpan di perangkat ini akan dihapus.</p>
+  <button class="btn" style="background:var(--red)" onclick="confirmReset()">Ya, Hapus Semua</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">Batal</button>`);
+}
+function confirmReset(){Object.values(LS).forEach(k=>localStorage.removeItem(k));closeModal();toast('Data direset');location.reload()}
+
+/* ---------- init ---------- */
+document.querySelectorAll('.nav[data-go]').forEach(n=>n.addEventListener('click',()=>go(n.dataset.go)));
+(function init(){
+  const dark=load(LS.dark,false);
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  document.getElementById('darkSwitch').checked=dark;
+  document.getElementById('notifSwitch').checked=load(LS.notif,true);
+  if(load(LS.logged,false)){ historyStack=[]; go('home'); }
+  else { go('splash'); }
+})();
+</script>
+</body>
+</html>
